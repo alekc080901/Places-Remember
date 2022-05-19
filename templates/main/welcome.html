@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title%}
+Places Remember
+{% endblock %}
+
+{% block body%}
+<script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
+<script type="text/javascript">
+  VK.init({
+    apiId: 1234
+  });
+</script>
+
+<div class="welcome-label row d-flex justify-content-center">
+    Добро пожаловать!
+</div>
+
+<div class="row d-flex justify-content-center" >
+  <div class="description col-10" >
+    На нашем сайте Вы можете собственноручно запечатлеть на карте все места, которые показались Вам интересными
+    или с которыми вас связывают трогательные воспоминания.
+  </div>
+</div>
+
+<div class="question row d-flex justify-content-center" >
+    Хотите попробовать?
+</div>
+
+<div id="vk_auth" style="margin: 2em auto;"></div>
+<script type="text/javascript">
+     VK.Widgets.Auth('vk_auth', {width: 700});
+</script>
+{% endblock %}
