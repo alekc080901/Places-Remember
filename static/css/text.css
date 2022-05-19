@@ -1,28 +1,19 @@
-.navbar-brand {
-    color: #dddde5;
-    font: 2.5em BrushType;
-    padding: 0;
-}
-
-.navbar-brand:hover {
-    color: #d1d1d4;
+a, a:link, a:visited, a:focus, a:hover, a:active {
+    text-decoration: none;
 }
 
 .welcome-label {
-    font: 6em Roboto;
+    font: 5em Roboto;
     color: #3c3c3e;
-    margin: 1em auto 0.6em
 }
 
 .description {
-    font: 2em Roboto;
+    font: 1.8em Roboto;
     color: #3c3c3e;
     text-align: center;
-    margin-bottom: 2.5em;
 }
 
 .question {
-    font: 4em Roboto;
+    font: 3em Roboto;
     color: #3c3c3e;
-    /*margin-bottom: 5em;*/
 }

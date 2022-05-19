@@ -1,6 +1,53 @@
 {% extends 'base.html' %}
 
+{% block style %}
+<link rel="stylesheet" href="/static/css/text.css">
+<link rel="stylesheet" href="/static/css/home.css">
+<link rel="stylesheet" href="/static/css/navbar.css">
+{% endblock %}
+
+
 {% block title%}
 Ваши места
 {% endblock %}
 
+{% block navbar %}
+<nav class="navbar">
+    <div class="logo">
+        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
+    </div>
+
+    <div class="personal-info">
+        <div class="avatar">
+            <img src="https://sun2.sibirix.userapi.com/s/v1/ig2/F3c9TSibbYUtv4mdIjqVsnCwSVv5mmYdDmIbNoSErKT06XgN59xiyUz5CwkyMUZXW_elDWPTmEjYSSry1PymaRvD.jpg?size=200x200&quality=96&crop=0,0,1079,1079&ava=1"
+            width=60 alt="Avatar">
+        </div>
+        <div class="name">
+            Александр Никитин
+        </div>
+        <div class="logout">
+            <img src="/static/img/logout.svg" width="35" alt="Выход">
+        </div>
+    </div>
+</nav>
+{% endblock%}
+
+{% block body%}
+
+
+{% if location_list|length == 0 %}
+    <div class="empty-list">
+        У вас нет ни одного воспоминания
+    </div>
+{% else %}
+    <div>Салют</div>
+{% endif %}
+
+<!--<div class="add-button">-->
+    <button class="add-button">
+        Добавить воспоминание
+    </button>
+<!--</div>-->
+
+
+{% endblock %}

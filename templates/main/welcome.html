@@ -1,8 +1,22 @@
 {% extends 'base.html' %}
 
+{% block style %}
+<link rel="stylesheet" href="/static/css/text.css">
+<link rel="stylesheet" href="/static/css/welcome.css">
+<link rel="stylesheet" href="/static/css/navbar.css">
+{% endblock %}
+
 {% block title%}
 Places Remember
 {% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div class="logo">
+        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
+    </div>
+</nav>
+{% endblock%}
 
 {% block body%}
 <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
@@ -12,22 +26,20 @@ Places Remember
   });
 </script>
 
-<div class="welcome-label row d-flex justify-content-center">
+<div class="welcome-label">
     Добро пожаловать!
 </div>
 
-<div class="row d-flex justify-content-center" >
-  <div class="description col-10" >
+<div class="description" >
     На нашем сайте Вы можете собственноручно запечатлеть на карте все места, которые показались Вам интересными
     или с которыми вас связывают трогательные воспоминания.
-  </div>
 </div>
 
-<div class="question row d-flex justify-content-center" >
+<div class="question" >
     Хотите попробовать?
 </div>
 
-<div id="vk_auth" style="margin: 2em auto;"></div>
+<div id="vk_auth"></div>
 <script type="text/javascript">
      VK.Widgets.Auth('vk_auth', {width: 700});
 </script>
