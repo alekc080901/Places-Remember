@@ -1,3 +1,4 @@
+import os
 import environ
 from pathlib import Path
 
@@ -5,6 +6,7 @@ env = environ.Env()
 env.read_env('.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+TEMPLATE_DIR_MAIN = os.path.join(BASE_DIR, "templates", "main")
 
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
@@ -19,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main'
 ]
 
 MIDDLEWARE = [
@@ -36,7 +39,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR_MAIN],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -44,7 +47,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'main',
             ],
         },
     },
