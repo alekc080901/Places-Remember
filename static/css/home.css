@@ -12,6 +12,7 @@
     background-color: #c61c2c;
     font: 2em Roboto;
     display: block;
+    cursor:pointer;
     border-radius: 40px;
     padding: 0.25em;
     text-align: center;
