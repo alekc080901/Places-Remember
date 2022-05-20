@@ -15,3 +15,19 @@
 #vk_auth {
     margin: 2em auto;
 }
+
+.welcome-label {
+    font: 5em Roboto;
+    color: #3c3c3e;
+}
+
+.description {
+    font: 1.8em Roboto;
+    color: #3c3c3e;
+    text-align: center;
+}
+
+.question {
+    font: 3em Roboto;
+    color: #3c3c3e;
+}

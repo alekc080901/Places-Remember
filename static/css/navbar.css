@@ -3,6 +3,14 @@ body {
     background-color: #eeeeee;
 }
 
+a, a:link, a:visited, a:focus, a:hover, a:active {
+    text-decoration: none;
+}
+
+.logo-text, .logo-text:link, .logo-text:visited, .logo-text:focus, .logo-text:hover, .logo-text:active {
+    text-decoration: none;
+}
+
 .navbar {
     display: flex;
     flex-direction: row;

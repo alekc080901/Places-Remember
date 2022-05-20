@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/text.css">
 <link rel="stylesheet" href="/static/css/home.css">
 <link rel="stylesheet" href="/static/css/navbar.css">
 {% endblock %}
@@ -40,14 +39,23 @@
         У вас нет ни одного воспоминания
     </div>
 {% else %}
-    <div>Салют</div>
+    <div class="memories">
+        <table>
+            <tr>
+                <th id="table-index">#</th>
+                <th id="table-location">Место</th>
+                <th id="table-comment">Комментарий</th>
+            </tr>
+            <tr><td>1</td><td>ИКИТ</td><td>Мой институт</td></tr>
+            <tr><td>2</td><td>Остров Татышев</td><td>Мое любимое место</td></tr>
+        </table>
+    </div>
+
 {% endif %}
 
-<!--<div class="add-button">-->
-    <button class="add-button">
-        Добавить воспоминание
-    </button>
-<!--</div>-->
+<button class="add-button">
+    Добавить воспоминание
+</button>
 
 
 {% endblock %}
