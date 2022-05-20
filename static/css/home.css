@@ -1,0 +1,64 @@
+.empty-list {
+    -webkit-user-select: none;
+    font: 4em Arial;
+    color: #c8c8c8;
+    text-align: center;
+    margin: 4em auto 0;
+}
+
+.add-button {
+    transition: all 0.3s ease;
+    color: #dddde5;
+    background-color: #c61c2c;
+    font: 2em Roboto;
+    display: block;
+    border-radius: 40px;
+    padding: 0.25em;
+    text-align: center;
+    height: 2em;
+    width: 13em;
+    margin: 1em auto;
+}
+
+.add-button:hover {
+    transition: all 0.3s ease;
+    background-color: #a51725;
+}
+
+.memories table {
+    border-collapse: collapse;
+    border: 1px solid grey;
+    color: #343333;
+    font: 2em Roboto;
+    text-align: center;
+    margin: 3em auto 1.5em;
+}
+
+.memories th {
+    border-left: solid grey 1px;
+    border-top: solid grey 1px;
+    color: #dddde5;
+    height: 1.5em;
+    background-color: #c61c2c;
+}
+
+#table-index {
+    width: 1em;
+}
+
+#table-location {
+    width: 9em;
+}
+
+#table-comment {
+    width: 18em;
+}
+
+.memories td {
+    border-left: solid grey 1px;
+    border-top: solid grey 1px;
+}
+
+.memories td:first-child, .memories th:first-child {
+     border-left: none;
+}

@@ -1,0 +1,15 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}  {% endblock %}</title>
+    {% block style %}{% endblock %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+</head>
+<body>
+    {% block navbar %}{% endblock %}
+    {% block body %}{% endblock %}
+</body>
+</html>
