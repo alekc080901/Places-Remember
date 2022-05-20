@@ -30,9 +30,6 @@
 
 #vk_auth {
     width: 70%;
-    /*display: flex;*/
-    /*justify-content: center;*/
-    /*align-items: center;*/
     display: block;
     height: 2em;
     font: 2em Roboto;
