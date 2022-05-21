@@ -16,6 +16,15 @@ from .const import AUTH_ABS_URL
 from .forms import AddMemoryForm
 
 
+def get_user_info(uid: int) -> dict:
+    db_info = User.objects.get(uid=uid)
+    full_name = f'{db_info.first_name} {db_info.last_name}'
+    return {
+        'name': full_name,
+        'avatar': db_info.avatar
+    }
+
+
 def create_map(uid: int) -> folium.Map:
     m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
 
@@ -35,13 +44,16 @@ def create_map(uid: int) -> folium.Map:
 @auth.is_authenticated
 def home(request):
     uid = request.COOKIES.get('user_id')
-    user_info = User.objects.get(uid=uid)
-    full_name = f'{user_info.first_name} {user_info.last_name}'
+
+    user_info = get_user_info(uid)
+
+    memories = Memory.objects.filter(user=uid)
+
 
     context = {
-        'name': full_name,
-        'avatar': user_info.avatar,
-        'location_list': [1],
+        'name': user_info['name'],
+        'avatar': user_info['avatar'],
+        'location_list': memories,
     }
     return render(request, 'home.html', context)
 
@@ -117,9 +129,12 @@ def handle_map(request):
             description=resp_content['description'],
         )
 
+    user_info = get_user_info(uid)
     add_form = AddMemoryForm()
     m = create_map(uid)
     context = {
+        'name': user_info['name'],
+        'avatar': user_info['avatar'],
         'map': m._repr_html_(),
         'add_form': add_form,
     }

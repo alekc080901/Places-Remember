@@ -2,8 +2,6 @@
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/home.css">
-<link rel="stylesheet" href="/static/css/navbar.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 {% endblock %}
 
 
@@ -12,32 +10,10 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="navbar">
-    <div class="logo">
-        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
-    </div>
-
-    <div class="personal-info">
-        <div class="avatar">
-            <img src="{{ avatar }}"
-            width=60 alt="Avatar">
-        </div>
-        <div class="name">
-            {{ name }}
-        </div>
-        <a class="logout" href="{% url 'logout' %}">
-            <img src="/static/img/logout.svg" width="35" alt="Выход">
-        </a>
-    </div>
-</nav>
-
+    {% include 'auth_navbar.html' %}
 {% endblock%}
 
 {% block body%}
-
-<button class="add-button">
-    Добавить воспоминание
-</button>
 
 {% if location_list|length == 0 %}
     <div class="empty-list">
@@ -51,10 +27,15 @@
                 <th id="table-location">Место</th>
                 <th id="table-comment">Комментарий</th>
             </tr>
-            <tr><td>1</td><td>ИКИТ</td><td>Мой институт</td></tr>
-            <tr><td>2</td><td>Остров Татышев</td><td>Мое любимое место</td></tr>
+            {% for l in location_list %}
+                <tr><td>{{ l.id }}</td><td>{{ l.place }}</td><td>{{ l.description }}</td></tr>
+            {% endfor %}
         </table>
     </div>
+
+    <a class="add-button" href="/map">
+        Добавить воспоминание
+    </a>
 
 {% endif %}
 
