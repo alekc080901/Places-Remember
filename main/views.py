@@ -16,6 +16,7 @@ from .const import AUTH_ABS_URL
 
 def create_map() -> folium.Map:
     m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
+    m.add_child(folium.LatLngPopup())
     return m
 
 
