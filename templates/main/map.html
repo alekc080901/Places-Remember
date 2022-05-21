@@ -10,17 +10,19 @@
 </div>
 
 <script>
-    function delete_add_form(scope) {
+    let last_coords = null;
+
+    function delete_add_form(scope, options={save_marker: false}) {
         const form = scope.querySelector('.form-window');
-        const marker = scope.querySelector('.leaflet-marker-icon')
-        const shadow = scope.querySelector('.leaflet-marker-shadow')
+        const markers = scope.querySelectorAll('.awesome-marker')
+        const shadows = scope.querySelectorAll('.awesome-marker-shadow')
 
         if (form !== null) {
             form.remove();
 
-            if (marker !== null) {
-                shadow.remove()
-                marker.remove()
+            if (markers !== null && !options.save_marker) {
+                markers[markers.length - 1].remove()
+                shadows[shadows.length - 1].remove()
             }
         }
     }
@@ -32,8 +34,8 @@
         form_wrapper.className += "form-window";
         const form = document.createElement('form')
         form.className += "add-form";
+        form.id += "add-form";
         form.method = "post";
-        form.action = "/";
 
         form.innerHTML = `
         {% csrf_token %}
@@ -45,7 +47,23 @@
 
         `
 
-        form.onsubmit = () => {console.log(window.location.reload())};
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch("/map", {
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                method: "POST",
+                body: JSON.stringify(Object.assign(last_coords, {
+                    'place': form['place'].value,
+                    'description': form['description'].value,
+                }))
+            })
+            // .then(() => delete_add_form(scope, {save_marker: true}))
+            .then(() => window.location.replace("/"))
+
+        };
         const close_button = document.createElement('a')
         close_button.className += 'close-form';
 
@@ -82,8 +100,6 @@
         await sleep(100).then(async () => {
             await get_map().then((mapContent) => {
                 mapContent.head.innerHTML += `<style>
-                    .leaflet-popup {display: none}
-
                     .add-form {
                         display: flex;
                         flex-direction: column;
@@ -160,8 +176,12 @@
         const float = '([+-]?[0-9]*[.]?[0-9]+)';
         const re = new RegExp(`${key}: ${float}<br>${key}: ${float}`);
 
-        const coords_arr = re.exec(coords_str).slice(1, 5);
-        return {latitude: coords_arr[1], longitude: coords_arr[3]}
+        const regex_result = re.exec(coords_str)
+        if (regex_result === null)
+            return null
+
+        const coords_arr = regex_result.slice(1, 5);
+        return {latitude: parseFloat(coords_arr[1]), longitude: parseFloat(coords_arr[3])}
     }
 
     init_map().then(async () => {
@@ -171,11 +191,14 @@
                     const popup = mutationRecords[0].target.querySelector('.leaflet-popup');
                     const coords_html = popup.querySelector('.leaflet-popup-content').innerHTML;
                     const coords = extract_coords(coords_html);
-                    const form = create_add_form(mapContent);
-                    form.style.transform = popup.style.transform;
-                    popup.replaceWith(form);
 
-                    console.log(coords);
+                    if (coords !== null) {
+                        const form = create_add_form(mapContent);
+                        form.style.transform = popup.style.transform;
+                        popup.replaceWith(form);
+
+                        last_coords = coords;
+                    }
                 }
             })
         });

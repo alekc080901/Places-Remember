@@ -1,22 +1,32 @@
 import datetime
+import json
 
 import requests
 import folium
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
+
 
 from control.settings import env
 
 from . import auth
-from .models import User
+from .models import User, Memory
 from .const import AUTH_ABS_URL
 from .forms import AddMemoryForm
 
 
-def create_map() -> folium.Map:
+def create_map(uid: int) -> folium.Map:
     m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
+
+    for marker in Memory.objects.filter(user=uid):
+        folium.Marker(
+            [marker.latitude, marker.longitude],
+            popup=marker.place,
+            draggable=None,
+            icon=folium.Icon(icon='heart', color='red', icon_color='white')
+        ).add_to(m)
+
     m.add_child(folium.LatLngPopup())
     m.add_child(folium.ClickForMarker())
     return m
@@ -24,14 +34,9 @@ def create_map() -> folium.Map:
 
 @auth.is_authenticated
 def home(request):
-    if request.method == 'POST':
-        print('Ура')
-
     uid = request.COOKIES.get('user_id')
     user_info = User.objects.get(uid=uid)
     full_name = f'{user_info.first_name} {user_info.last_name}'
-
-
 
     context = {
         'name': full_name,
@@ -97,15 +102,23 @@ def logout(request):
     resp.delete_cookie('expires_in')
     return resp
 
-
-# @xframe_options_exempt
+@csrf_exempt
 @auth.is_authenticated
 def handle_map(request):
     uid = request.COOKIES.get('user_id')
-    # Получаю координаты меток
+
+    if request.method == 'POST':
+        resp_content = json.loads(request.body)
+        Memory.objects.create(
+            user=uid,
+            latitude=resp_content['latitude'],
+            longitude=resp_content['longitude'],
+            place=resp_content['place'],
+            description=resp_content['description'],
+        )
 
     add_form = AddMemoryForm()
-    m = create_map()
+    m = create_map(uid)
     context = {
         'map': m._repr_html_(),
         'add_form': add_form,

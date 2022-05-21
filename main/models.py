@@ -12,6 +12,7 @@ class User(models.Model):
 
 
 class Memory(models.Model):
+    user = models.PositiveIntegerField()
     latitude = models.FloatField()
     longitude = models.FloatField()
     place = models.TextField()
