@@ -1,8 +1,11 @@
 import datetime
 
 import requests
+import folium
 
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from control.settings import env
 
@@ -11,15 +14,24 @@ from .models import User
 from .const import AUTH_ABS_URL
 
 
+def create_map() -> folium.Map:
+    m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
+    return m
+
+
 @auth.is_authenticated
 def home(request):
     uid = request.COOKIES.get('user_id')
     user_info = User.objects.get(uid=uid)
     full_name = f'{user_info.first_name} {user_info.last_name}'
 
+    map_widget = folium.Map()
+    # map_widget = map_widget._repr_html_()
+
     context = {
         'name': full_name,
         'avatar': user_info.avatar,
+        'map': map_widget,
         'location_list': [1],
     }
     return render(request, 'home.html', context)
@@ -80,3 +92,13 @@ def logout(request):
     resp.delete_cookie('created_at')
     resp.delete_cookie('expires_in')
     return resp
+
+
+@xframe_options_exempt
+@auth.is_authenticated
+def handle_map(request):
+    uid = request.COOKIES.get('user_id')
+    # Получаю координаты меток
+
+    m = create_map()
+    return HttpResponse(m._repr_html_())

@@ -63,3 +63,10 @@
 .memories td:first-child, .memories th:first-child {
      border-left: none;
 }
+
+#map {
+    display: block;
+    width: 500px;
+    height: 300px;
+    margin: 1em auto;
+}
