@@ -12,6 +12,13 @@ class AddMemoryForm(forms.ModelForm):
             'description': '',
         }
         widgets = {
-            'place': forms.TextInput(attrs={'class': 'form-place', 'placeholder': 'Место'}),
-            'description': forms.Textarea(attrs={'class': 'form-description'}),
+            'place': forms.TextInput(attrs={
+                'class': 'form-place',
+                'placeholder': 'Место',
+                'autocomplete': 'off',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-description',
+                'autocomplete': 'off',
+            }),
         }

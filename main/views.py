@@ -23,18 +23,18 @@ def create_map() -> folium.Map:
 
 @auth.is_authenticated
 def home(request):
+    if request.method == 'POST':
+        print('Ура')
+
     uid = request.COOKIES.get('user_id')
     user_info = User.objects.get(uid=uid)
     full_name = f'{user_info.first_name} {user_info.last_name}'
 
-    map_widget = folium.Map()
-    add_form = AddMemoryForm()
+
 
     context = {
         'name': full_name,
         'avatar': user_info.avatar,
-        'map': map_widget,
-        'add_form': add_form,
         'location_list': [1],
     }
     return render(request, 'home.html', context)
@@ -97,11 +97,18 @@ def logout(request):
     return resp
 
 
-@xframe_options_exempt
+# @xframe_options_exempt
 @auth.is_authenticated
 def handle_map(request):
     uid = request.COOKIES.get('user_id')
     # Получаю координаты меток
 
+    add_form = AddMemoryForm()
     m = create_map()
-    return HttpResponse(m._repr_html_())
+
+    print(m._repr_html_())
+    context = {
+        'map': m._repr_html_(),
+        'add_form': add_form,
+    }
+    return render(request, 'map.html', context)
