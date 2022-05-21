@@ -18,15 +18,15 @@
 
     <div class="personal-info">
         <div class="avatar">
-            <img src="https://sun2.sibirix.userapi.com/s/v1/ig2/F3c9TSibbYUtv4mdIjqVsnCwSVv5mmYdDmIbNoSErKT06XgN59xiyUz5CwkyMUZXW_elDWPTmEjYSSry1PymaRvD.jpg?size=200x200&quality=96&crop=0,0,1079,1079&ava=1"
+            <img src="{{ avatar }}"
             width=60 alt="Avatar">
         </div>
         <div class="name">
-            Александр Никитин
+            {{ name }}
         </div>
-        <div class="logout">
+        <a class="logout" href="{% url 'logout' %}">
             <img src="/static/img/logout.svg" width="35" alt="Выход">
-        </div>
+        </a>
     </div>
 </nav>
 {% endblock%}

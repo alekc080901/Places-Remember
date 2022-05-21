@@ -12,10 +12,6 @@
     text-align: center;
 }
 
-#vk_auth {
-    margin: 2em auto;
-}
-
 .welcome-label {
     font: 5em Roboto;
     color: #3c3c3e;
@@ -30,4 +26,24 @@
 .question {
     font: 3em Roboto;
     color: #3c3c3e;
+}
+
+#vk_auth {
+    width: 70%;
+    display: block;
+    height: 2em;
+    font: 2em Roboto;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 2em;
+    color: #ffffff;
+    background-color: #5181b8;
+    border: 0;
+    border-radius: 8px;
+    margin: 1em auto;
+    cursor:pointer;
+}
+
+#vk_auth:hover {
+    opacity: .88;
 }
