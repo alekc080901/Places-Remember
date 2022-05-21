@@ -12,6 +12,7 @@ from control.settings import env
 from . import auth
 from .models import User
 from .const import AUTH_ABS_URL
+from .forms import AddMemoryForm
 
 
 def create_map() -> folium.Map:
@@ -27,12 +28,13 @@ def home(request):
     full_name = f'{user_info.first_name} {user_info.last_name}'
 
     map_widget = folium.Map()
-    # map_widget = map_widget._repr_html_()
+    add_form = AddMemoryForm()
 
     context = {
         'name': full_name,
         'avatar': user_info.avatar,
         'map': map_widget,
+        'add_form': add_form,
         'location_list': [1],
     }
     return render(request, 'home.html', context)

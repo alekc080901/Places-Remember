@@ -9,3 +9,13 @@ class User(models.Model):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+
+class Memory(models.Model):
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    place = models.TextField()
+    description = models.TextField()
+
+    def __str__(self):
+        return self.place

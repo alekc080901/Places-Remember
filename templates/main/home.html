@@ -3,7 +3,6 @@
 {% block style %}
 <link rel="stylesheet" href="/static/css/home.css">
 <link rel="stylesheet" href="/static/css/navbar.css">
-<script src="/static/js/home.js"></script>
 {% endblock %}
 
 
@@ -30,6 +29,7 @@
         </a>
     </div>
 </nav>
+
 {% endblock%}
 
 {% block body%}
@@ -57,4 +57,78 @@
     Добавить воспоминание
 </button>
 <iframe id="memory_map" src="/map"></iframe>
+
+<script>
+    function create_add_form() {
+        const form = document.createElement('form')
+        form.className += "add-form";
+        form.method = "post";
+
+        form.innerHTML = `
+        {% csrf_token %}
+        {{ add_form.place }}
+        <hr>
+        {{ add_form.description }}
+        <input type="submit" value="Добавить" class="form-submit">
+        `
+        console.log(form)
+        document.body.appendChild(form)
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function get_map() {
+        return new Promise((resolve) => {
+            const iframeContent = document.querySelector('#memory_map').contentDocument;
+            resolve(iframeContent.querySelector('iframe').contentDocument);
+        })
+    }
+
+    async function init_map() {
+        await sleep(100).then(async () => {
+            await get_map().then((mapContent) => {
+                mapContent.head.innerHTML += '<style>.leaflet-popup {display: none}</style>';
+            });
+        })
+            .catch(init_map)
+    }
+
+    function extract_coords(coords_str) {
+        const key = '(\\w*)';
+        const float = '([+-]?[0-9]*[.]?[0-9]+)';
+        const re = new RegExp(`${key}: ${float}<br>${key}: ${float}`);
+
+        const coords_arr = re.exec(coords_str).slice(1, 5);
+        return {latitude: coords_arr[1], longitude: coords_arr[3]}
+    }
+
+    init_map().then(async () => {
+        const observer = new MutationObserver(mutationRecords => {
+            const coords_html = mutationRecords[0].target.querySelector('.leaflet-popup')
+                .querySelector('.leaflet-popup-content').innerHTML;
+
+            const coords = extract_coords(coords_html);
+            console.log(coords);
+        });
+
+        async function get_observer() {
+            await sleep(100).then(async () => {
+                await get_map().then((mapContent) => {
+                    observer.observe(mapContent.querySelector('.leaflet-pane .leaflet-popup-pane'), {
+                        childList: true,
+                        attributes: false,
+                        characterData: false,
+                    });
+                });
+            })
+                .catch(get_observer)
+        }
+
+        await get_observer()
+    })
+
+    create_add_form()
+</script>
 {% endblock %}
