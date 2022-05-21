@@ -12,11 +12,21 @@
 <script>
     function delete_add_form(scope) {
         const form = scope.querySelector('.form-window');
-        if (form !== null)
+        const marker = scope.querySelector('.leaflet-marker-icon')
+        const shadow = scope.querySelector('.leaflet-marker-shadow')
+
+        if (form !== null) {
             form.remove();
+
+            if (marker !== null) {
+                shadow.remove()
+                marker.remove()
+            }
+        }
     }
+
     function create_add_form(scope) {
-        delete_add_form(scope);
+        delete_add_form(scope, false);
 
         const form_wrapper = document.createElement('div')
         form_wrapper.className += "form-window";
@@ -35,7 +45,7 @@
 
         `
 
-        form.onsubmit = () => console.log(window.parent.window.parent.window.parent.location.reload());
+        form.onsubmit = () => {console.log(window.location.reload())};
         const close_button = document.createElement('a')
         close_button.className += 'close-form';
 

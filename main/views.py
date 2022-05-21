@@ -18,6 +18,7 @@ from .forms import AddMemoryForm
 def create_map() -> folium.Map:
     m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
     m.add_child(folium.LatLngPopup())
+    m.add_child(folium.ClickForMarker())
     return m
 
 
@@ -105,8 +106,6 @@ def handle_map(request):
 
     add_form = AddMemoryForm()
     m = create_map()
-
-    print(m._repr_html_())
     context = {
         'map': m._repr_html_(),
         'add_form': add_form,
