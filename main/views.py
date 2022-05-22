@@ -3,11 +3,10 @@ import json
 import math
 from typing import Union
 
-import django.http
 import requests
 import folium
-from django.db import IntegrityError
 
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
@@ -19,6 +18,7 @@ from . import auth
 from .models import User, Memory
 from .const import AUTH_ABS_URL, DEFAULT_START_ZOOM, DEFAULT_LOCATION
 from .forms import AddMemoryForm
+from .custom_folium import EditedClickForMarker, EditedLatLngPopup
 
 
 def scale_to_zoom(scale: str) -> Union[int, None]:
@@ -73,8 +73,8 @@ def create_map(uid: int) -> folium.Map:
     m = folium.Map(location=location, zoom_start=zoom)
     [marker.add_to(m) for marker in markers]
 
-    m.add_child(folium.LatLngPopup())
-    m.add_child(folium.ClickForMarker())
+    m.add_child(EditedLatLngPopup())
+    m.add_child(EditedClickForMarker())
     return m
 
 
