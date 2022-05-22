@@ -1,5 +1,6 @@
 import datetime
 import json
+import math
 
 import requests
 import folium
@@ -12,8 +13,15 @@ from control.settings import env
 
 from . import auth
 from .models import User, Memory
-from .const import AUTH_ABS_URL
+from .const import AUTH_ABS_URL, DEFAULT_START_ZOOM, DEFAULT_LOCATION
 from .forms import AddMemoryForm
+
+
+def scale_to_zoom(scale: str) -> int:
+    if scale.lower() == 'default':
+        return DEFAULT_START_ZOOM
+
+    return int(math.log2(int(scale))) + 1
 
 
 def get_user_info(uid: int) -> dict:
@@ -26,15 +34,22 @@ def get_user_info(uid: int) -> dict:
 
 
 def create_map(uid: int) -> folium.Map:
-    m = folium.Map(location=[63.391522, 96.328125], zoom_start=2)
-
+    markers = []
+    zoom = DEFAULT_START_ZOOM
+    location = DEFAULT_LOCATION
     for marker in Memory.objects.filter(user=uid):
-        folium.Marker(
-            [marker.latitude, marker.longitude],
+        location = (marker.latitude, marker.longitude)
+        zoom = marker.zoom
+
+        markers.append(folium.Marker(
+            location,
             popup=marker.place,
             draggable=None,
             icon=folium.Icon(icon='heart', color='red', icon_color='white'),
-        ).add_to(m)
+        ))
+
+    m = folium.Map(location=location, zoom_start=zoom)
+    [marker.add_to(m) for marker in markers]
 
     m.add_child(folium.LatLngPopup())
     m.add_child(folium.ClickForMarker())
@@ -49,9 +64,6 @@ def home(request):
         request_json = json.loads(request.body)
         idx = int(request_json['idx']) - 1
         Memory.objects.filter(user=uid)[idx].delete()
-
-
-
 
     user_info = get_user_info(uid)
 
@@ -134,6 +146,7 @@ def handle_map(request):
             user=uid,
             latitude=resp_content['latitude'],
             longitude=resp_content['longitude'],
+            zoom=scale_to_zoom(resp_content['scale']),
             place=resp_content['place'],
             description=resp_content['description'],
         )

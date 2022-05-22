@@ -4,6 +4,11 @@
 Карта
 {% endblock %}
 
+{% block style %}
+<link rel="stylesheet" href="/static/css/map.css">
+{% endblock %}
+
+
 {% block navbar %}
     {% include 'auth_navbar.html' %}
 {% endblock%}
@@ -13,24 +18,36 @@
     {{ map|safe }}
 </div>
 
+
 <script>
+    function get_current_zoom(scope) {
+        const zoom_container = scope.querySelector('.leaflet-proxy');
+        const re = RegExp('translate3d\\(.*?\\) scale\\((\\d*)\\)');
+
+        if (zoom_container.style.transform === "")
+            return 'default';
+
+        return re.exec(zoom_container.style.transform)[1];
+
+    }
+
     let last_coords = null;
 
     function delete_add_form(scope, action, options = {save_marker: false}) {
         const form = scope.querySelector('.form-window');
-        const markers = scope.querySelectorAll('.awesome-marker')
-        const shadows = scope.querySelectorAll('.awesome-marker-shadow')
+        const markers = scope.querySelectorAll('.awesome-marker');
+        const shadows = scope.querySelectorAll('.awesome-marker-shadow');
 
         const remove_index = action === 'click' ? 2 :
                              action === 'scroll'? 1 :
-                             action === 'close'? 1 : 1
+                             action === 'close'? 1 : 1;
 
         if (form !== null) {
             form.remove();
 
             if (markers !== null && !options.save_marker) {
-                markers[markers.length - remove_index].remove()
-                shadows[shadows.length - remove_index].remove()
+                markers[markers.length - remove_index].remove();
+                shadows[shadows.length - remove_index].remove();
             }
         }
     }
@@ -66,6 +83,7 @@
                 body: JSON.stringify(Object.assign(last_coords, {
                     'place': form['place'].value,
                     'description': form['description'].value,
+                    'scale': get_current_zoom(scope),
                 }))
             })
                 // .then(() => delete_add_form(scope, null, {save_marker: true}))
@@ -192,11 +210,15 @@
         const coords_arr = regex_result.slice(1, 5);
         return {latitude: parseFloat(coords_arr[1]), longitude: parseFloat(coords_arr[3])}
     }
-
+    // Create form on click
     init_map().then(async () => {
+
         const map_observer = new MutationObserver(async mutationRecords => {
             await get_map().then((mapContent) => {
                 if (mutationRecords[0].removedNodes.length === 0) {
+                    get_current_zoom(mapContent);
+
+
                     const popup = mutationRecords[0].target.querySelector('.leaflet-popup');
                     const coords_html = popup.querySelector('.leaflet-popup-content').innerHTML;
                     const coords = extract_coords(coords_html);
@@ -211,6 +233,7 @@
                 }
             })
         });
+        // Delete form on scroll
 
         const zoom_observer = new MutationObserver(async () => {
             await get_map().then((mapContent) => {

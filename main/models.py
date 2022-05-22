@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class User(models.Model):
@@ -14,6 +15,7 @@ class User(models.Model):
 class Memory(models.Model):
     user = models.PositiveIntegerField()
     latitude = models.FloatField()
+    zoom = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(18)])
     longitude = models.FloatField()
     place = models.TextField()
     description = models.TextField()
