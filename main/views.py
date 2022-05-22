@@ -21,7 +21,7 @@ def get_user_info(uid: int) -> dict:
     full_name = f'{db_info.first_name} {db_info.last_name}'
     return {
         'name': full_name,
-        'avatar': db_info.avatar
+        'avatar': db_info.avatar,
     }
 
 
@@ -33,7 +33,7 @@ def create_map(uid: int) -> folium.Map:
             [marker.latitude, marker.longitude],
             popup=marker.place,
             draggable=None,
-            icon=folium.Icon(icon='heart', color='red', icon_color='white')
+            icon=folium.Icon(icon='heart', color='red', icon_color='white'),
         ).add_to(m)
 
     m.add_child(folium.LatLngPopup())
@@ -48,12 +48,12 @@ def home(request):
     user_info = get_user_info(uid)
 
     memories = Memory.objects.filter(user=uid)
-
+    indexes = list(range(1, len(memories) + 1))
 
     context = {
         'name': user_info['name'],
         'avatar': user_info['avatar'],
-        'location_list': memories,
+        'location_list': list(zip(indexes, memories)),
     }
     return render(request, 'home.html', context)
 
@@ -113,6 +113,7 @@ def logout(request):
     resp.delete_cookie('created_at')
     resp.delete_cookie('expires_in')
     return resp
+
 
 @csrf_exempt
 @auth.is_authenticated

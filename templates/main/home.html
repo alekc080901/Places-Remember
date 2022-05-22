@@ -27,16 +27,16 @@
                 <th id="table-location">Место</th>
                 <th id="table-comment">Комментарий</th>
             </tr>
-            {% for l in location_list %}
-                <tr><td>{{ l.id }}</td><td>{{ l.place }}</td><td>{{ l.description }}</td></tr>
+            {% for idx, loc in location_list %}
+                <tr><td>{{ idx }}</td><td>{{ loc.place }}</td><td>{{ loc.description }}</td></tr>
             {% endfor %}
         </table>
     </div>
 
-    <a class="add-button" href="/map">
-        Добавить воспоминание
-    </a>
-
 {% endif %}
+
+<a class="add-button" href="/map">
+    Добавить воспоминание
+</a>
 
 {% endblock %}

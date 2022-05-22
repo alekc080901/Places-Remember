@@ -9,31 +9,34 @@
 {% endblock%}
 
 {% block body %}
-    <div id="memory_map">
-        {{ map|safe }}
-    </div>
-{% endblock%}
+<div id="memory_map">
+    {{ map|safe }}
+</div>
 
 <script>
     let last_coords = null;
 
-    function delete_add_form(scope, options={save_marker: false}) {
+    function delete_add_form(scope, action, options = {save_marker: false}) {
         const form = scope.querySelector('.form-window');
         const markers = scope.querySelectorAll('.awesome-marker')
         const shadows = scope.querySelectorAll('.awesome-marker-shadow')
+
+        const remove_index = action === 'click' ? 2 :
+                             action === 'scroll'? 1 :
+                             action === 'close'? 1 : 1
 
         if (form !== null) {
             form.remove();
 
             if (markers !== null && !options.save_marker) {
-                markers[markers.length - 1].remove()
-                shadows[shadows.length - 1].remove()
+                markers[markers.length - remove_index].remove()
+                shadows[shadows.length - remove_index].remove()
             }
         }
     }
 
     function create_add_form(scope) {
-        delete_add_form(scope, false);
+        delete_add_form(scope, 'click', false);
 
         const form_wrapper = document.createElement('div')
         form_wrapper.className += "form-window";
@@ -54,10 +57,10 @@
 
         form.onsubmit = async (e) => {
             e.preventDefault();
-            await fetch("/map", {
+            await fetch("{% url 'map' %}", {
                 headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 method: "POST",
                 body: JSON.stringify(Object.assign(last_coords, {
@@ -65,16 +68,17 @@
                     'description': form['description'].value,
                 }))
             })
-            // .then(() => delete_add_form(scope, {save_marker: true}))
-            .then(() => window.location.replace("/"))
+                // .then(() => delete_add_form(scope, null, {save_marker: true}))
+                .then(() => window.location.replace("{% url 'home' %}"))
 
         };
         const close_button = document.createElement('a')
         close_button.className += 'close-form';
 
         close_button.addEventListener("click", function (e) {
-            delete_add_form(scope);
+            delete_add_form(scope, 'close');
         });
+
         const close_icon = document.createElement('img')
         close_icon.src = '/static/img/cross.png'
         close_icon.className += 'close-icon';
@@ -210,7 +214,7 @@
 
         const zoom_observer = new MutationObserver(async () => {
             await get_map().then((mapContent) => {
-                delete_add_form(mapContent);
+                delete_add_form(mapContent, 'scroll');
             })
         });
 
@@ -224,7 +228,7 @@
                     });
 
                     zoom_observer.observe(mapContent.querySelector('.leaflet-map-pane'),
-                    { attributes : true, attributeFilter : ['class'] })
+                        {attributes: true, attributeFilter: ['class']})
                 });
             })
                 .catch(set_observers)
@@ -233,5 +237,5 @@
         await set_observers()
     })
 </script>
-</body>
-</html>
+
+{% endblock%}

@@ -36,6 +36,10 @@
     margin: 2em auto 1.5em;
 }
 
+.memories tr:nth-child(2n + 1) {
+    background-color: rgba(168, 0, 0, 0.05);
+}
+
 .memories th {
     border-left: solid grey 1px;
     border-top: solid grey 1px;
@@ -45,7 +49,7 @@
 }
 
 #table-index {
-    width: 1em;
+    width: 1.4em;
 }
 
 #table-location {
