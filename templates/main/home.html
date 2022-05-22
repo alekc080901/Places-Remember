@@ -2,7 +2,6 @@
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/home.css">
-<link rel="stylesheet" href="/static/css/navbar.css">
 {% endblock %}
 
 
@@ -11,28 +10,10 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="navbar">
-    <div class="logo">
-        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
-    </div>
-
-    <div class="personal-info">
-        <div class="avatar">
-            <img src="{{ avatar }}"
-            width=60 alt="Avatar">
-        </div>
-        <div class="name">
-            {{ name }}
-        </div>
-        <a class="logout" href="{% url 'logout' %}">
-            <img src="/static/img/logout.svg" width="35" alt="Выход">
-        </a>
-    </div>
-</nav>
+    {% include 'auth_navbar.html' %}
 {% endblock%}
 
 {% block body%}
-
 
 {% if location_list|length == 0 %}
     <div class="empty-list">
@@ -40,22 +21,47 @@
     </div>
 {% else %}
     <div class="memories">
-        <table>
-            <tr>
-                <th id="table-index">#</th>
-                <th id="table-location">Место</th>
-                <th id="table-comment">Комментарий</th>
-            </tr>
-            <tr><td>1</td><td>ИКИТ</td><td>Мой институт</td></tr>
-            <tr><td>2</td><td>Остров Татышев</td><td>Мое любимое место</td></tr>
-        </table>
+        <div class="memories-header">#</div>
+        <div class="memories-header">Место</div>
+        <div class="memories-header">Комментарий</div>
+        {% for idx, loc in location_list %}
+            <div class="cell" id="idx-{{ idx }}">{{ idx }}</div>
+            <div class="cell" id="place-{{ idx }}">{{ loc.place }}</div>
+            <div class="cell cell-last" id="description-{{ idx }}">
+                {{ loc.description }}
+                <div class="delete" id="delete-{{ idx }}">
+                    <img src="/static/img/minus.png" alt="Del">
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
 {% endif %}
 
-<button class="add-button">
+<a class="add-button" href="/map">
     Добавить воспоминание
-</button>
+</a>
 
+<script>
+    const delete_buttons = document.querySelectorAll('[id^=delete]')
+    delete_buttons.forEach((button) =>
+        button.addEventListener('click', () => {
+                const idx = button.id.split('-')[1]
+                document.getElementById(`idx-${idx}`).remove()
+                document.getElementById(`place-${idx}`).remove()
+                document.getElementById(`description-${idx}`).remove()
 
+                fetch('{% url "home" %}', {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({idx: idx}),
+                })
+            }
+        )
+    )
+</script>
 {% endblock %}

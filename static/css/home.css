@@ -11,14 +11,15 @@
     color: #dddde5;
     background-color: #c61c2c;
     font: 2em Roboto;
-    display: block;
-    cursor:pointer;
     border-radius: 40px;
     padding: 0.25em;
-    text-align: center;
-    height: 2em;
+    line-height: 1.8em;
+    display: flex;
+    justify-content: center;
+    height: 1.8em;
     width: 13em;
     margin: 1em auto;
+    cursor: pointer;
 }
 
 .add-button:hover {
@@ -26,40 +27,58 @@
     background-color: #a51725;
 }
 
-.memories table {
-    border-collapse: collapse;
-    border: 1px solid grey;
+.memories {
+    display: grid;
+    grid-template-rows: repeat(auto-fill, 1.9em);
+    grid-template-columns: 2.5em 10em auto;
+    width: 80%;
+    border: 3px solid grey;
     color: #343333;
-    font: 2em Roboto;
+    font: 2em "Comic Sans MS";
     text-align: center;
-    margin: 3em auto 1.5em;
+    margin: 2em auto 1.5em;
+    background-color: grey;
+    grid-gap: 3px;
 }
 
-.memories th {
-    border-left: solid grey 1px;
-    border-top: solid grey 1px;
+.memories-header {
+    display: flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 1.3em;
     color: #dddde5;
-    height: 1.5em;
     background-color: #c61c2c;
 }
 
-#table-index {
+.memories .cell {
+    min-width: 0;
+    background-color: #eeeeee;
+}
+
+.memories .cell-last {
+    position: relative;
+}
+
+.delete {
+    position: absolute;
+    display: flex;
+    align-items:center;
+    justify-content:center;
+    left: 100%;
+    bottom: 0;
     width: 1em;
+    border-radius: 0.15em;
+    height: 1em;
+    cursor: pointer;
+    margin-left: 0.4em;
 }
 
-#table-location {
-    width: 9em;
+.delete img {
+    max-width: 100%;
+    height: auto;
 }
 
-#table-comment {
-    width: 18em;
-}
-
-.memories td {
-    border-left: solid grey 1px;
-    border-top: solid grey 1px;
-}
-
-.memories td:first-child, .memories th:first-child {
-     border-left: none;
+.delete:hover {
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.3);
 }
