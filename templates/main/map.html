@@ -215,11 +215,12 @@
 
         const map_observer = new MutationObserver(async mutationRecords => {
             await get_map().then((mapContent) => {
-                if (mutationRecords[0].removedNodes.length === 0) {
+                if (mutationRecords[0].addedNodes.length > 0 &&
+                    mutationRecords[0].addedNodes[0].className !== 'form-window') {
                     get_current_zoom(mapContent);
 
-
-                    const popup = mutationRecords[0].target.querySelector('.leaflet-popup');
+                    const popups = mutationRecords[0].target.querySelectorAll('.leaflet-popup');
+                    const popup = popups[popups.length - 1];
                     const coords_html = popup.querySelector('.leaflet-popup-content').innerHTML;
                     const coords = extract_coords(coords_html);
 

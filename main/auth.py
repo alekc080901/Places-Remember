@@ -2,10 +2,14 @@ import datetime
 
 from django.shortcuts import redirect
 
+from control.settings import TESTING
+
 
 def is_authenticated(view):
     def wrapper(request):
-        uid = request.COOKIES.get('user_id')
+        if TESTING:
+            return view(request)
+        uid = request.COOKIES.get('uid')
         access_token = request.COOKIES.get('access_token')
         created_at = request.COOKIES.get('created_at')
         expires_in = request.COOKIES.get('expires_in')
@@ -27,7 +31,10 @@ def is_authenticated(view):
 
 def is_not_authenticated(view):
     def wrapper(request):
-        uid = request.COOKIES.get('user_id')
+        if TESTING:
+            return view(request)
+
+        uid = request.COOKIES.get('uid')
         access_token = request.COOKIES.get('access_token')
         created_at = request.COOKIES.get('created_at')
         expires_in = request.COOKIES.get('expires_in')

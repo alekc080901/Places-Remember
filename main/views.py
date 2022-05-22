@@ -1,13 +1,16 @@
 import datetime
 import json
 import math
+from typing import Union
 
 import requests
 import folium
 
-from django.shortcuts import render, redirect
+from django.db import IntegrityError
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-
+from django.urls import reverse
+from django.http import JsonResponse, HttpResponse
 
 from control.settings import env
 
@@ -15,17 +18,35 @@ from . import auth
 from .models import User, Memory
 from .const import AUTH_ABS_URL, DEFAULT_START_ZOOM, DEFAULT_LOCATION
 from .forms import AddMemoryForm
+from .custom_folium import EditedClickForMarker, EditedLatLngPopup
 
 
-def scale_to_zoom(scale: str) -> int:
-    if scale.lower() == 'default':
+def scale_to_zoom(scale: str) -> Union[int, None]:
+    """Transforms scale of the map to folium zoom number"""
+    if not isinstance(scale, str) and not isinstance(scale, int) and not isinstance(scale, float):
+        return None
+    if isinstance(scale, str) and scale.lower() == 'default':
         return DEFAULT_START_ZOOM
 
     return int(math.log2(int(scale))) + 1
 
 
+def get_uid(request) -> Union[int, None]:
+    """Handles user id from cookie"""
+    uid = request.COOKIES.get('uid')
+
+    if uid is None:
+        return None
+
+    if isinstance(uid, str) and not uid.isdigit():
+        return None
+
+    return int(uid)
+
+
 def get_user_info(uid: int) -> dict:
-    db_info = User.objects.get(uid=uid)
+    """Return full name and avatar of user by id"""
+    db_info = get_object_or_404(User, uid=uid)
     full_name = f'{db_info.first_name} {db_info.last_name}'
     return {
         'name': full_name,
@@ -34,6 +55,7 @@ def get_user_info(uid: int) -> dict:
 
 
 def create_map(uid: int) -> folium.Map:
+    """Creates user map that reflects the user markers and last location on the map"""
     markers = []
     zoom = DEFAULT_START_ZOOM
     location = DEFAULT_LOCATION
@@ -51,19 +73,34 @@ def create_map(uid: int) -> folium.Map:
     m = folium.Map(location=location, zoom_start=zoom)
     [marker.add_to(m) for marker in markers]
 
-    m.add_child(folium.LatLngPopup())
-    m.add_child(folium.ClickForMarker())
+    m.add_child(EditedLatLngPopup())
+    m.add_child(EditedClickForMarker())
     return m
 
 
 @auth.is_authenticated
 def home(request):
-    uid = request.COOKIES.get('user_id')
+    uid = get_uid(request)
+    if uid is None:
+        return redirect(reverse('welcome'))
 
     if request.method == 'DELETE':
         request_json = json.loads(request.body)
-        idx = int(request_json['idx']) - 1
-        Memory.objects.filter(user=uid)[idx].delete()
+
+        if 'idx' not in request_json:
+            return HttpResponse(status=400)
+
+        try:
+            idx = int(request_json['idx']) - 1
+            deleted_memory = Memory.objects.filter(user=uid)[idx]
+            deleted_memory_id = deleted_memory.id
+            deleted_memory.delete()
+        except (ValueError, IndexError) as e:
+            return HttpResponse(status=400)
+
+        return JsonResponse({
+            'id': deleted_memory_id,
+        })
 
     user_info = get_user_info(uid)
 
@@ -75,6 +112,7 @@ def home(request):
         'avatar': user_info['avatar'],
         'location_list': list(zip(indexes, memories)),
     }
+
     return render(request, 'home.html', context)
 
 
@@ -102,23 +140,23 @@ def auth_confirm(request):
     })
     vk_access_content = vk_response.json()
 
-    if not User.objects.filter(uid=vk_access_content['user_id']).exists():
-        user_content = requests.get('https://api.vk.com/method/users.get?user_id=210700286&v=5.131', params={
+    if not User.objects.filter(uid=vk_access_content.get('user_id')).exists():
+        user_content = requests.get('https://api.vk.com/method/users.get?', params={
             'access_token': env('VK_SECURE_ACCESS_TOKEN'),
-            'user_ids': vk_access_content.get('user_id'),
+            'uids': vk_access_content.get('uid'),
             'fields': ['photo_100'],
             'v': 5.131,
             'lang': 0,
         }).json()['response'][0]
 
         User.objects.create(uid=user_content['id'],
-                            first_name=user_content['first_name'],
-                            last_name=user_content['last_name'],
-                            avatar=user_content['photo_100'],
-                            )
+                        first_name=user_content['first_name'],
+                        last_name=user_content['last_name'],
+                        avatar=user_content['photo_100'],
+                        )
 
-    resp = redirect('/')
-    resp.set_cookie('user_id', vk_access_content['user_id'])
+    resp = redirect(reverse('home'))
+    resp.set_cookie('uid', vk_access_content['user_id'])
     resp.set_cookie('access_token', vk_access_content['access_token'])
     resp.set_cookie('created_at', datetime.datetime.utcnow().timestamp())
     resp.set_cookie('expires_in', vk_access_content['expires_in'])
@@ -127,8 +165,8 @@ def auth_confirm(request):
 
 @auth.is_authenticated
 def logout(request):
-    resp = redirect('/welcome')
-    resp.delete_cookie('user_id')
+    resp = redirect(reverse('welcome'))
+    resp.delete_cookie('uid')
     resp.delete_cookie('access_token')
     resp.delete_cookie('created_at')
     resp.delete_cookie('expires_in')
@@ -137,19 +175,33 @@ def logout(request):
 
 @csrf_exempt
 @auth.is_authenticated
-def handle_map(request):
-    uid = request.COOKIES.get('user_id')
+def map_handle(request):
+    uid = get_uid(request)
+    if uid is None:
+        return redirect(reverse('welcome'))
 
     if request.method == 'POST':
         resp_content = json.loads(request.body)
-        Memory.objects.create(
-            user=uid,
-            latitude=resp_content['latitude'],
-            longitude=resp_content['longitude'],
-            zoom=scale_to_zoom(resp_content['scale']),
-            place=resp_content['place'],
-            description=resp_content['description'],
-        )
+
+        fields = ('latitude', 'longitude', 'scale', 'place', 'description')
+        if any(field not in resp_content for field in fields):
+            return HttpResponse(status=400)
+
+        try:
+            new_memory = Memory.objects.create(
+                user=uid,
+                latitude=resp_content['latitude'],
+                longitude=resp_content['longitude'],
+                zoom=scale_to_zoom(resp_content['scale']),
+                place=resp_content['place'],
+                description=resp_content['description'],
+            )
+        except (IntegrityError, ValueError):
+            return HttpResponse(status=400)
+
+        return JsonResponse({
+            'id': new_memory.id,
+        })
 
     user_info = get_user_info(uid)
     add_form = AddMemoryForm()
