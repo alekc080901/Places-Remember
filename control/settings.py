@@ -1,6 +1,12 @@
 import os
-import environ
+import sys
 from pathlib import Path
+
+import environ
+
+
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
 
 env = environ.Env()
 env.read_env('.env')
@@ -56,16 +62,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'control.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': env('POSTGRES_HOST'),
-        'NAME': env('POSTGRES_DATABASE'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'PORT': '5432',
+if TESTING:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': '',
+            'NAME': 'name',
+            'USER': '',
+            'PASSWORD': env('TESTING_POSTGRES_PASSWORD'),
+            'PORT': '5432',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': env('POSTGRES_HOST'),
+            'NAME': env('POSTGRES_DATABASE'),
+            'USER': env('POSTGRES_USER'),
+            'PASSWORD': env('POSTGRES_PASSWORD'),
+            'PORT': '5432',
+            'TEST': {
+                'HOST': env('POSTGRES_HOST'),
+            },
+        }
+    }
 
 LANGUAGE_CODE = 'ru'
 
