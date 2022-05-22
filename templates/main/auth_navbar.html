@@ -1,0 +1,22 @@
+{% load static %}
+
+<link rel="stylesheet" href="/static/css/navbar.css">
+
+<nav class="navbar">
+    <div class="logo">
+        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
+    </div>
+
+    <div class="personal-info">
+        <div class="avatar">
+            <img src="{{ avatar }}"
+            width=60 alt="Avatar">
+        </div>
+        <div class="name">
+            {{ name }}
+        </div>
+        <a class="logout" href="{% url 'logout' %}">
+            <img src="{% static 'img/logout.svg' %}" width="35" alt="Выход">
+        </a>
+    </div>
+</nav>

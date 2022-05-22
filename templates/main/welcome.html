@@ -10,11 +10,7 @@ Places Remember
 {% endblock %}
 
 {% block navbar %}
-<nav class="navbar">
-    <div class="logo">
-        <a class="logo-text" href="{% url 'home' %}">Places Remember</a>
-    </div>
-</nav>
+    {% include 'unauth_navbar.html' %}
 {% endblock%}
 
 {% block body%}

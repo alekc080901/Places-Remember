@@ -1,26 +1,79 @@
 import datetime
+import json
+import math
 
 import requests
+import folium
 
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
+
 
 from control.settings import env
 
 from . import auth
-from .models import User
-from .const import AUTH_ABS_URL
+from .models import User, Memory
+from .const import AUTH_ABS_URL, DEFAULT_START_ZOOM, DEFAULT_LOCATION
+from .forms import AddMemoryForm
+
+
+def scale_to_zoom(scale: str) -> int:
+    if scale.lower() == 'default':
+        return DEFAULT_START_ZOOM
+
+    return int(math.log2(int(scale))) + 1
+
+
+def get_user_info(uid: int) -> dict:
+    db_info = User.objects.get(uid=uid)
+    full_name = f'{db_info.first_name} {db_info.last_name}'
+    return {
+        'name': full_name,
+        'avatar': db_info.avatar,
+    }
+
+
+def create_map(uid: int) -> folium.Map:
+    markers = []
+    zoom = DEFAULT_START_ZOOM
+    location = DEFAULT_LOCATION
+    for marker in Memory.objects.filter(user=uid):
+        location = (marker.latitude, marker.longitude)
+        zoom = marker.zoom
+
+        markers.append(folium.Marker(
+            location,
+            popup=marker.place,
+            draggable=None,
+            icon=folium.Icon(icon='heart', color='red', icon_color='white'),
+        ))
+
+    m = folium.Map(location=location, zoom_start=zoom)
+    [marker.add_to(m) for marker in markers]
+
+    m.add_child(folium.LatLngPopup())
+    m.add_child(folium.ClickForMarker())
+    return m
 
 
 @auth.is_authenticated
 def home(request):
     uid = request.COOKIES.get('user_id')
-    user_info = User.objects.get(uid=uid)
-    full_name = f'{user_info.first_name} {user_info.last_name}'
+
+    if request.method == 'DELETE':
+        request_json = json.loads(request.body)
+        idx = int(request_json['idx']) - 1
+        Memory.objects.filter(user=uid)[idx].delete()
+
+    user_info = get_user_info(uid)
+
+    memories = Memory.objects.filter(user=uid)
+    indexes = list(range(1, len(memories) + 1))
 
     context = {
-        'name': full_name,
-        'avatar': user_info.avatar,
-        'location_list': [1],
+        'name': user_info['name'],
+        'avatar': user_info['avatar'],
+        'location_list': list(zip(indexes, memories)),
     }
     return render(request, 'home.html', context)
 
@@ -80,3 +133,31 @@ def logout(request):
     resp.delete_cookie('created_at')
     resp.delete_cookie('expires_in')
     return resp
+
+
+@csrf_exempt
+@auth.is_authenticated
+def handle_map(request):
+    uid = request.COOKIES.get('user_id')
+
+    if request.method == 'POST':
+        resp_content = json.loads(request.body)
+        Memory.objects.create(
+            user=uid,
+            latitude=resp_content['latitude'],
+            longitude=resp_content['longitude'],
+            zoom=scale_to_zoom(resp_content['scale']),
+            place=resp_content['place'],
+            description=resp_content['description'],
+        )
+
+    user_info = get_user_info(uid)
+    add_form = AddMemoryForm()
+    m = create_map(uid)
+    context = {
+        'name': user_info['name'],
+        'avatar': user_info['avatar'],
+        'map': m._repr_html_(),
+        'add_form': add_form,
+    }
+    return render(request, 'map.html', context)
