@@ -21,16 +21,19 @@
     </div>
 {% else %}
     <div class="memories">
-        <table>
-            <tr>
-                <th id="table-index">#</th>
-                <th id="table-location">Место</th>
-                <th id="table-comment">Комментарий</th>
-            </tr>
-            {% for idx, loc in location_list %}
-                <tr><td>{{ idx }}</td><td>{{ loc.place }}</td><td>{{ loc.description }}</td></tr>
-            {% endfor %}
-        </table>
+        <div class="memories-header">#</div>
+        <div class="memories-header">Место</div>
+        <div class="memories-header">Комментарий</div>
+        {% for idx, loc in location_list %}
+            <div class="cell" id="idx-{{ idx }}">{{ idx }}</div>
+            <div class="cell" id="place-{{ idx }}">{{ loc.place }}</div>
+            <div class="cell cell-last" id="description-{{ idx }}">
+                {{ loc.description }}
+                <div class="delete" id="delete-{{ idx }}">
+                    <img src="/static/img/minus.png" alt="Del">
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
 {% endif %}
@@ -39,4 +42,26 @@
     Добавить воспоминание
 </a>
 
+<script>
+    const delete_buttons = document.querySelectorAll('[id^=delete]')
+    delete_buttons.forEach((button) =>
+        button.addEventListener('click', () => {
+                const idx = button.id.split('-')[1]
+                document.getElementById(`idx-${idx}`).remove()
+                document.getElementById(`place-${idx}`).remove()
+                document.getElementById(`description-${idx}`).remove()
+
+                fetch('{% url "home" %}', {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({idx: idx}),
+                })
+            }
+        )
+    )
+</script>
 {% endblock %}

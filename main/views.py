@@ -45,6 +45,14 @@ def create_map(uid: int) -> folium.Map:
 def home(request):
     uid = request.COOKIES.get('user_id')
 
+    if request.method == 'DELETE':
+        request_json = json.loads(request.body)
+        idx = int(request_json['idx']) - 1
+        Memory.objects.filter(user=uid)[idx].delete()
+
+
+
+
     user_info = get_user_info(uid)
 
     memories = Memory.objects.filter(user=uid)
