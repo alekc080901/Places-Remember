@@ -150,12 +150,15 @@ def auth_confirm(request):
     Token.objects.update_or_create(uid=uid, defaults={'access_token': access_token})
 
     if not User.objects.filter(uid=uid).exists():
+<<<<<<< HEAD
 
         response = requests.get(
             "https://api.vk.com/method/users.get?",
             params={
                 "access_token": env("VK_SECURE_ACCESS_TOKEN"),
                 "user_id": uid,
+=======
+>>>>>>> 3528c80e2d1f455fb169f4410a75d7f6b516f7a4
                 "fields": ["photo_100"],
                 "v": 5.131,
                 "lang": 0,
