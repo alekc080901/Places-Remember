@@ -18,10 +18,10 @@ from . import auth
 from .const import AUTH_ABS_URL, DEFAULT_LOCATION, DEFAULT_START_ZOOM
 from .custom_folium import EditedClickForMarker, EditedLatLngPopup
 from .forms import AddMemoryForm
-from .models import Memory, User
+from .models import Memory, User, Token
 
 
-def scale_to_zoom(scale: str) -> Union[int, None]:
+def scale_to_zoom(uid: int, scale: str) -> Union[int, None]:
     """Transforms scale of the map to folium zoom number"""
     if (
         not isinstance(scale, str)
@@ -30,7 +30,11 @@ def scale_to_zoom(scale: str) -> Union[int, None]:
     ):
         return None
     if isinstance(scale, str) and scale.lower() == "default":
-        return DEFAULT_START_ZOOM
+        memories = Memory.objects.filter(user=uid)
+        if memories.count() == 0:
+            return DEFAULT_START_ZOOM
+        else:
+            return memories[memories.count() - 1].zoom
 
     return int(math.log2(int(scale))) + 1
 
@@ -137,17 +141,27 @@ def auth_confirm(request):
     )
     vk_access_content = vk_response.json()
 
-    if not User.objects.filter(uid=vk_access_content.get("user_id")).exists():
-        user_content = requests.get(
+    if vk_access_content.get('error', None) is not None:
+        return HttpResponse(status=400)
+
+    uid = vk_access_content.get("user_id")
+    access_token = vk_access_content.get("access_token")
+
+    Token.objects.update_or_create(uid=uid, defaults={'access_token': access_token})
+
+    if not User.objects.filter(uid=uid).exists():
+
+        response = requests.get(
             "https://api.vk.com/method/users.get?",
             params={
                 "access_token": env("VK_SECURE_ACCESS_TOKEN"),
-                "uids": vk_access_content.get("uid"),
+                "user_id": uid,
                 "fields": ["photo_100"],
                 "v": 5.131,
                 "lang": 0,
             },
-        ).json()["response"][0]
+        )
+        user_content = response.json()["response"][0]
 
         User.objects.create(
             uid=user_content["id"],
@@ -158,7 +172,7 @@ def auth_confirm(request):
 
     resp = redirect(reverse("home"))
     resp.set_cookie("uid", vk_access_content["user_id"])
-    resp.set_cookie("access_token", vk_access_content["access_token"])
+    resp.set_cookie("access_token", access_token)
     resp.set_cookie("created_at", datetime.datetime.utcnow().timestamp())
     resp.set_cookie("expires_in", vk_access_content["expires_in"])
     return resp
@@ -166,6 +180,8 @@ def auth_confirm(request):
 
 @auth.is_authenticated
 def logout(request, uid):
+    Token.objects.filter(uid=uid).delete()
+
     resp = redirect(reverse("welcome"))
     resp.delete_cookie("uid")
     resp.delete_cookie("access_token")
@@ -189,7 +205,7 @@ def map_handle(request, uid):
                 user=uid,
                 latitude=resp_content["latitude"],
                 longitude=resp_content["longitude"],
-                zoom=scale_to_zoom(resp_content["scale"]),
+                zoom=scale_to_zoom(uid, resp_content["scale"]),
                 place=resp_content["place"],
                 description=resp_content["description"],
             )
