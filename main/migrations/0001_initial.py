@@ -7,28 +7,35 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Memory',
+            name="Memory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.PositiveIntegerField()),
-                ('latitude', models.FloatField()),
-                ('longitude', models.FloatField()),
-                ('place', models.TextField()),
-                ('description', models.TextField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("user", models.PositiveIntegerField()),
+                ("latitude", models.FloatField()),
+                ("longitude", models.FloatField()),
+                ("place", models.TextField()),
+                ("description", models.TextField()),
             ],
         ),
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('uid', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('first_name', models.TextField()),
-                ('last_name', models.TextField()),
-                ('avatar', models.TextField()),
+                ("uid", models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ("first_name", models.TextField()),
+                ("last_name", models.TextField()),
+                ("avatar", models.TextField()),
             ],
         ),
     ]

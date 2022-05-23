@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/home.css">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
 
 
@@ -10,31 +11,31 @@
 {% endblock %}
 
 {% block navbar %}
-    {% include 'auth_navbar.html' %}
+{% include 'auth_navbar.html' %}
 {% endblock%}
 
 {% block body%}
 
 {% if location_list|length == 0 %}
-    <div class="empty-list">
-        У вас нет ни одного воспоминания
-    </div>
+<div class="empty-list">
+    У вас нет ни одного воспоминания
+</div>
 {% else %}
-    <div class="memories">
-        <div class="memories-header">#</div>
-        <div class="memories-header">Место</div>
-        <div class="memories-header">Комментарий</div>
-        {% for idx, loc in location_list %}
-            <div class="cell" id="idx-{{ idx }}">{{ idx }}</div>
-            <div class="cell" id="place-{{ idx }}">{{ loc.place }}</div>
-            <div class="cell cell-last" id="description-{{ idx }}">
-                {{ loc.description }}
-                <div class="delete" id="delete-{{ idx }}">
-                    <img src="/static/img/minus.png" alt="Del">
-                </div>
-            </div>
-        {% endfor %}
+<div class="memories">
+    <div class="memories-header">#</div>
+    <div class="memories-header">Место</div>
+    <div class="memories-header">Комментарий</div>
+    {% for idx, loc in location_list %}
+    <div class="cell" id="idx-{{ loc.id }}">{{ idx }}</div>
+    <div class="cell" id="place-{{ loc.id }}">{{ loc.place }}</div>
+    <div class="cell cell-last" id="description-{{ loc.id }}">
+        {{ loc.description }}
+        <div class="delete" id="delete-{{ loc.id }}">
+            <img src="{% static 'img/minus.png' %}" alt="Del">
+        </div>
     </div>
+    {% endfor %}
+</div>
 
 {% endif %}
 
@@ -42,14 +43,17 @@
     Добавить воспоминание
 </a>
 
+{{location_object | json_script:"locations-data"}}
+
 <script>
+    let value = JSON.parse(document.getElementById('locations-data').textContent);
     const delete_buttons = document.querySelectorAll('[id^=delete]')
     delete_buttons.forEach((button) =>
         button.addEventListener('click', () => {
-                const idx = button.id.split('-')[1]
-                document.getElementById(`idx-${idx}`).remove()
-                document.getElementById(`place-${idx}`).remove()
-                document.getElementById(`description-${idx}`).remove()
+                const id = button.id.split('-')[1]
+                document.getElementById(`idx-${id}`).remove()
+                document.getElementById(`place-${id}`).remove()
+                document.getElementById(`description-${id}`).remove()
 
                 fetch('{% url "home" %}', {
                     method: 'DELETE',
@@ -58,7 +62,14 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}',
                     },
-                    body: JSON.stringify({idx: idx}),
+                    body: JSON.stringify({id: id}),
+                })
+
+                value = value.filter(({id: source}) => source !== Number(id))
+                console.log(value)
+                value.forEach(({id: source}, i) => {
+                    const element = document.getElementById(`idx-${source}`)
+                    if (element) element.innerText = i + 1
                 })
             }
         )

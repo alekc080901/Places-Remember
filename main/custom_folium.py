@@ -1,10 +1,11 @@
-from folium import LatLngPopup, ClickForMarker
+from folium import ClickForMarker, LatLngPopup
 from jinja2 import Template
 
 
 class EditedLatLngPopup(LatLngPopup):
 
-    _template = Template(u"""
+    _template = Template(
+        """
             {% macro script(this, kwargs) %}
                 var {{this.get_name()}} = L.popup();
                 function latLngPop(e) {
@@ -16,14 +17,16 @@ class EditedLatLngPopup(LatLngPopup):
                     }
                 {{this._parent.get_name()}}.on('click', latLngPop);
             {% endmacro %}
-            """)  # noqa
+            """
+    )  # noqa
 
     def __init__(self):
         super().__init__()
 
 
 class EditedClickForMarker(ClickForMarker):
-    _template = Template(u"""
+    _template = Template(
+        """
                 {% macro script(this, kwargs) %}
                     function newMarker(e){
                         var new_mark = L.marker(e.latlng, {icon: L.AwesomeMarkers.icon({icon: 'heart', markerColor: 'red'})}).addTo({{this._parent.get_name()}});
@@ -35,7 +38,8 @@ class EditedClickForMarker(ClickForMarker):
                         };
                     {{this._parent.get_name()}}.on('click', newMarker);
                 {% endmacro %}
-                """)
+                """
+    )
 
     def __init__(self):
         super().__init__()

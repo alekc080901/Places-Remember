@@ -1,14 +1,26 @@
 body {
-    display:table;
-    max-height:100%;
+    margin: 0;
+    background-color: #eeeeee;
+    box-sizing: border-box;
+    height: 100vh;
     width: 100%;
 }
 
 .navbar {
-    display:table-row;
+    display: table-row;
     height: 20%
 }
 
 #memory_map {
-    display:table-row;
+    height: calc(100vh - var(--navbar-height));
+    width: 100vw;
+}
+
+#memory_map > div {
+    height: 100%;
+}
+
+#memory_map > div > div {
+    height: calc(100vh - var(--navbar-height)) !important;
+    padding-bottom: 0 !important;
 }

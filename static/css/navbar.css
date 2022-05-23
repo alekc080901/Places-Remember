@@ -17,7 +17,23 @@ a, a:link, a:visited, a:focus, a:hover, a:active {
     justify-content: space-between;
     background-color: #c61c2c;
     width: 100%;
-    height: 4em;
+    height: var(--navbar-height);
+}
+
+:root {
+    --navbar-height: 4em;
+}
+
+@media screen and (max-width: 760px) {
+    .navbar {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    :root {
+        --navbar-height: 8em;
+    }
 }
 
 .logo-text {
@@ -41,7 +57,7 @@ a, a:link, a:visited, a:focus, a:hover, a:active {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    width: 35%;
+    width: max-content;
     align-items: center;
     margin-right: 0.5em;
 }

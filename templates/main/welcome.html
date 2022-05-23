@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/welcome.css">
-<link rel="stylesheet" href="/static/css/navbar.css">
+<link rel="stylesheet" href="{% static 'css/welcome.css' %}">
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
 {% endblock %}
 
 {% block title%}
