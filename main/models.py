@@ -22,3 +22,8 @@ class Memory(models.Model):
 
     def __str__(self):
         return self.place
+
+
+class Token(models.Model):
+    uid = models.PositiveIntegerField(primary_key=True)
+    access_token = models.CharField(max_length=100)

@@ -15,7 +15,7 @@ TEMPLATE_DIR_MAIN = os.path.join(BASE_DIR, "templates", "main")
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "0.0.0.0",
